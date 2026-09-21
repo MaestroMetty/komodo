@@ -5,36 +5,32 @@ import { ActionIcon, Button, Group, TextInput } from "@mantine/core";
 const LINK_SEPARATOR = " | ";
 
 function sanitizeLinkUrl(url: string) {
-  return url.replaceAll("|", "").trim();
+  return url.replaceAll("|", "");
 }
 
 export function parseResourceLink(raw: string): {
   url: string;
   label?: string;
 } {
-  const trimmed = raw.trim();
-  const spaced = trimmed.lastIndexOf(LINK_SEPARATOR);
+  const spaced = raw.lastIndexOf(LINK_SEPARATOR);
   if (spaced > 0) {
-    const label = trimmed.slice(0, spaced).trim();
-    const url = sanitizeLinkUrl(
-      trimmed.slice(spaced + LINK_SEPARATOR.length),
-    );
-    if (label) return { url, label };
+    const label = raw.slice(0, spaced);
+    const url = sanitizeLinkUrl(raw.slice(spaced + LINK_SEPARATOR.length));
+    if (label.trim()) return { url, label };
   }
-  const pipe = trimmed.lastIndexOf("|");
+  const pipe = raw.lastIndexOf("|");
   if (pipe > 0) {
-    const label = trimmed.slice(0, pipe).trim();
-    const url = sanitizeLinkUrl(trimmed.slice(pipe + 1));
-    if (label && url && /:\/\//.test(url)) return { url, label };
+    const label = raw.slice(0, pipe);
+    const url = sanitizeLinkUrl(raw.slice(pipe + 1));
+    if (label.trim() && url.trim() && /:\/\//.test(url)) return { url, label };
   }
-  return { url: sanitizeLinkUrl(trimmed) };
+  return { url: sanitizeLinkUrl(raw) };
 }
 
 export function formatResourceLink(url: string, label?: string) {
-  const trimmedUrl = sanitizeLinkUrl(url);
-  const trimmedLabel = label?.trim() ?? "";
-  if (!trimmedLabel) return trimmedUrl;
-  return `${trimmedLabel}${LINK_SEPARATOR}${trimmedUrl}`;
+  const sanitizedUrl = sanitizeLinkUrl(url);
+  if (!label?.trim()) return sanitizedUrl;
+  return `${label}${LINK_SEPARATOR}${sanitizedUrl}`;
 }
 
 export default function ConfigLinks<T extends { links?: string[] }>({

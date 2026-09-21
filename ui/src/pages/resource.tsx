@@ -142,7 +142,9 @@ function ResourceHeader({ type, id }: { type: UsableResource; id: string }) {
         {links && links.length > 0 && (
           <Group px="md">
             {links.map((link) => {
-              const { url, label } = parseResourceLink(link);
+              const parsed = parseResourceLink(link);
+              const url = parsed.url.trim();
+              const label = parsed.label?.trim();
               if (!url) return null;
               const display = label || url;
               return (
