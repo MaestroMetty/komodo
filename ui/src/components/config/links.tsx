@@ -4,8 +4,8 @@ import { ActionIcon, Button, Group, TextInput } from "@mantine/core";
 
 const LINK_SEPARATOR = " | ";
 
-function sanitizeLinkUrl(url: string) {
-  return url.replaceAll("|", "");
+export function sanitizeLinkUrl(url: string) {
+  return url.replace(/[\s|<>"\\^{}`]/g, "");
 }
 
 export function parseResourceLink(raw: string): {
@@ -15,22 +15,21 @@ export function parseResourceLink(raw: string): {
   const spaced = raw.lastIndexOf(LINK_SEPARATOR);
   if (spaced > 0) {
     const label = raw.slice(0, spaced);
-    const url = sanitizeLinkUrl(raw.slice(spaced + LINK_SEPARATOR.length));
+    const url = raw.slice(spaced + LINK_SEPARATOR.length);
     if (label.trim()) return { url, label };
   }
   const pipe = raw.lastIndexOf("|");
   if (pipe > 0) {
     const label = raw.slice(0, pipe);
-    const url = sanitizeLinkUrl(raw.slice(pipe + 1));
+    const url = raw.slice(pipe + 1);
     if (label.trim() && url.trim() && /:\/\//.test(url)) return { url, label };
   }
-  return { url: sanitizeLinkUrl(raw) };
+  return { url: raw };
 }
 
 export function formatResourceLink(url: string, label?: string) {
-  const sanitizedUrl = sanitizeLinkUrl(url);
-  if (!label?.trim()) return sanitizedUrl;
-  return `${label}${LINK_SEPARATOR}${sanitizedUrl}`;
+  if (!label?.trim()) return url;
+  return `${label}${LINK_SEPARATOR}${url}`;
 }
 
 export default function ConfigLinks<T extends { links?: string[] }>({
@@ -62,6 +61,10 @@ export default function ConfigLinks<T extends { links?: string[] }>({
             <TextInput
               value={url}
               onChange={(e) => updateAt(i, e.target.value, label)}
+              onBlur={() => {
+                const cleanUrl = sanitizeLinkUrl(url);
+                if (cleanUrl !== url) updateAt(i, cleanUrl, label);
+              }}
               disabled={disabled}
               placeholder="Input link"
               w={{ base: 160, md: 250, lg: 400 }}

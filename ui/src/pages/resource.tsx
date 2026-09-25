@@ -1,6 +1,9 @@
 import ExportToml from "@/components/export-toml";
 import ResourceUpdates from "@/components/updates/resource";
-import { parseResourceLink } from "@/components/config/links";
+import {
+  parseResourceLink,
+  sanitizeLinkUrl,
+} from "@/components/config/links";
 import {
   useListItemQuery,
   usePermissions,
@@ -143,7 +146,7 @@ function ResourceHeader({ type, id }: { type: UsableResource; id: string }) {
           <Group px="md">
             {links.map((link) => {
               const parsed = parseResourceLink(link);
-              const url = parsed.url.trim();
+              const url = sanitizeLinkUrl(parsed.url);
               const label = parsed.label?.trim();
               if (!url) return null;
               const display = label || url;
